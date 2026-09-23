@@ -21,8 +21,13 @@ async function listGroups(req, res) {
 
 async function updateGroup(req, res) {
   try {
-    const group = await Group.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!group) return res.status(404).json({ success: false, message: "Group nahi mila." });
+    const group = await Group.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
+    if (!group)
+      return res
+        .status(404)
+        .json({ success: false, message: "Group nahi mila." });
     res.json({ success: true, group });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -37,5 +42,4 @@ async function deleteGroup(req, res) {
     res.status(500).json({ success: false, message: err.message });
   }
 }
-
 module.exports = { createGroup, listGroups, updateGroup, deleteGroup };

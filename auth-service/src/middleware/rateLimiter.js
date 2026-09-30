@@ -1,6 +1,19 @@
 const rateLimit = require("express-rate-limit");
 
-// Brute-force protection on login: max 10 attempts per 15 minutes per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const registrationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -12,4 +25,4 @@ const loginLimiter = rateLimit({
   },
 });
 
-module.exports = { loginLimiter };
+module.exports = { authLimiter, loginLimiter, registrationLimiter };

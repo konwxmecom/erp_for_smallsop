@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
     name: { type: String, required: true, trim: true },
     group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },
     gstPercent: { type: Number, default: 0 },
@@ -12,7 +17,7 @@ const productSchema = new mongoose.Schema(
     purchasePrice: { type: Number, default: 0 },
     salePrice: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Product", productSchema);

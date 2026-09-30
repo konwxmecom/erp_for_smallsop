@@ -2,7 +2,14 @@ const Expense = require("../models/Expense");
 
 async function createExpense(req, res) {
   try {
-    const expense = await Expense.create(req.body);
+    const { category, amount, note, date } = req.body;
+    const expense = await Expense.create({
+      ownerId: req.user.id,
+      category,
+      amount,
+      note,
+      date,
+    });
     res.status(201).json({ success: true, expense });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -11,7 +18,7 @@ async function createExpense(req, res) {
 
 async function listExpenses(req, res) {
   try {
-    const filter = {};
+    const filter = { ownerId: req.user.id };
     if (req.query.from || req.query.to) {
       filter.date = {};
       if (req.query.from) filter.date.$gte = new Date(req.query.from);
@@ -26,7 +33,10 @@ async function listExpenses(req, res) {
 
 async function deleteExpense(req, res) {
   try {
-    await Expense.findByIdAndDelete(req.params.id);
+    await Expense.findOneAndDelete({
+      _id: req.params.id,
+      ownerId: req.user.id,
+    });
     res.json({ success: true, message: "Expense delete ho gaya." });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

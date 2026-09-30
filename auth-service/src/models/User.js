@@ -4,12 +4,18 @@ const userSchema = new mongoose.Schema(
   {
     shopName: { type: String, required: true, trim: true },
     name: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
     password: { type: String, required: true }, // bcrypt hash
     role: { type: String, enum: ["owner", "staff"], default: "owner" },
-    refreshToken: { type: String, default: null },
+    refreshTokenHash: { type: String, default: null, select: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("User", userSchema);

@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const AUTH_URL = import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:5000";
+const AUTH_URL =
+  import.meta.env.VITE_AUTH_SERVICE_URL || "http://localhost:5000";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
 
 export const authApi = axios.create({ baseURL: AUTH_URL });
@@ -22,8 +23,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem("refreshToken");
-        const { data } = await authApi.post("/refresh-token", { refreshToken });
+        const data = await refreshTokens(refreshToken);
         localStorage.setItem("accessToken", data.accessToken);
+        if (data.refreshToken)
+          localStorage.setItem("refreshToken", data.refreshToken);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);
       } catch (refreshErr) {
@@ -32,5 +35,18 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
+let refreshPromise;
+
+function refreshTokens(refreshToken) {
+  if (!refreshPromise) {
+    refreshPromise = authApi
+      .post("/refresh-token", { refreshToken })
+      .then(({ data }) => data)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}

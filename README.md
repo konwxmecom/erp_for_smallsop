@@ -34,12 +34,13 @@ configs — these map to Chapters 7 & 8 in `docs/requirements.md`.
 ## Local setup — full walkthrough
 
 ### 1. Prerequisites
-| Tool | Check |
-|---|---|
-| Node.js v18+ | `node -v` |
-| npm | `npm -v` |
-| MongoDB | see below |
-| Postman (optional, for API testing) | — |
+
+| Tool                                | Check     |
+| ----------------------------------- | --------- |
+| Node.js v18+                        | `node -v` |
+| npm                                 | `npm -v`  |
+| MongoDB                             | see below |
+| Postman (optional, for API testing) | —         |
 
 ### 2. MongoDB — run as a single-node replica set
 
@@ -52,6 +53,7 @@ mongod --dbpath /path/to/your/data --replSet rs0
 ```
 
 In a second terminal, run **once**:
+
 ```bash
 mongosh
 > rs.initiate()
@@ -62,33 +64,40 @@ mongosh
 early learning, just note it as a Chapter 8 TODO.)
 
 ### 3. auth-service
+
 ```bash
 cd auth-service
 npm install
-cp .env.example .env      # edit JWT secrets if you like
+cp .env.example .env      # set both JWT secrets before starting
 npm run dev
 ```
+
 Runs on `http://localhost:5000`
 
 ### 4. main-app backend
+
 ```bash
 cd main-app/backend
 npm install
 cp .env.example .env
 npm run dev
 ```
+
 Runs on `http://localhost:5001`
 
 ### 5. main-app frontend
+
 ```bash
 cd main-app/frontend
 npm install
 cp .env.example .env
 npm run dev
 ```
+
 Opens on `http://localhost:5173`
 
 ### 6. First run
+
 1. Open `http://localhost:5173/register`, create your shop account.
 2. Login.
 3. Go to **Products** → add a Group + a Product (set stock, sale price, GST).
@@ -98,6 +107,7 @@ Opens on `http://localhost:5173`
 6. Check **Dashboard** and **Reports** — numbers should update live.
 
 ### Common issues
+
 - **"MongoNetworkError" / can't connect** → is `mongod` actually running? Right `MONGO_URI`?
 - **Purchase/Sale save fails with a transaction error** → replica set not initiated — redo step 2.
 - **401 errors on every request** → `AUTH_SERVICE_URL` in `main-app/backend/.env` wrong, or
@@ -107,5 +117,18 @@ Opens on `http://localhost:5173`
 - **Port already in use** → change `PORT` in the relevant `.env`, or `npx kill-port 5000`.
 
 ## Extending this later
+
 See `docs/requirements.md` for what's built vs. pending, and the chapter table in the
 original blueprint for the intended build order (barcode/printing, testing, deployment).
+
+## Security and deployment notes
+
+- Generate separate random JWT secrets of at least 32 bytes for `JWT_ACCESS_SECRET` and
+  `JWT_REFRESH_SECRET`; do not commit `.env` files. Use HTTPS for both services and set
+  `CORS_ORIGIN` to the exact frontend origin(s) in production.
+- Business records are now scoped to their creating account. Existing records without an
+  `ownerId` will not appear after deployment. Before upgrading a database, back it up and
+  assign legacy records to the correct account only after confirming the database contains
+  data for a single shop; mixed-shop data requires a deliberate per-shop migration.
+- Refresh tokens are now stored as hashes and rotate on use. Existing users must sign in
+  again once after deploying this change.

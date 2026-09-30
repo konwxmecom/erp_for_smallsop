@@ -2,6 +2,11 @@ const mongoose = require("mongoose");
 
 const partySchema = new mongoose.Schema(
   {
+    ownerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      index: true,
+    },
     name: { type: String, required: true, trim: true },
     type: { type: String, enum: ["customer", "supplier"], required: true },
     phone: { type: String, trim: true },
@@ -11,7 +16,7 @@ const partySchema = new mongoose.Schema(
     //   type=supplier -> positive balance = shop owes the supplier (udhaar liya)
     balance: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Party", partySchema);

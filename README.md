@@ -133,13 +133,6 @@ original blueprint for the intended build order (barcode/printing, testing, depl
 - Refresh tokens are now stored as hashes and rotate on use. Existing users must sign in
   again once after deploying this change.
 
-## Reviewing commits
-
-Security changes use descriptive, file-focused commits. Review the history and inspect a
-specific change with:
-
-```bash
-git log --oneline --max-count=40
-git show --stat <commit-hash>
-git show <commit-hash>
+```
+chel
 ```

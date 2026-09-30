@@ -1,9 +1,20 @@
 const express = require("express");
 const { body, validationResult } = require("express-validator");
-const { register, login, verify, refreshToken, logout } = require("../controllers/authController");
-const { loginLimiter } = require("../middleware/rateLimiter");
+const {
+  register,
+  login,
+  verify,
+  refreshToken,
+  logout,
+} = require("../controllers/authController");
+const {
+  authLimiter,
+  loginLimiter,
+  registrationLimiter,
+} = require("../middleware/rateLimiter");
 
 const router = express.Router();
+router.use(authLimiter);
 
 function handleValidation(req, res, next) {
   const errors = validationResult(req);
@@ -15,25 +26,42 @@ function handleValidation(req, res, next) {
 
 router.post(
   "/register",
+  registrationLimiter,
   [
-    body("shopName").trim().notEmpty().withMessage("Shop ka naam zaroori hai."),
-    body("name").trim().notEmpty().withMessage("Naam zaroori hai."),
-    body("email").isEmail().withMessage("Valid email dein."),
-    body("password").isLength({ min: 6 }).withMessage("Password kam se kam 6 characters ka ho."),
+    body("shopName")
+      .trim()
+      .isLength({ min: 1, max: 120 })
+      .withMessage("Shop ka naam valid dein."),
+    body("name")
+      .trim()
+      .isLength({ min: 1, max: 120 })
+      .withMessage("Naam valid dein."),
+    body("email")
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Valid email dein."),
+    body("password")
+      .isLength({ min: 12, max: 72 })
+      .withMessage("Password 12 se 72 characters ka hona chahiye."),
   ],
   handleValidation,
-  register
+  register,
 );
 
 router.post(
   "/login",
   loginLimiter,
   [
-    body("email").isEmail().withMessage("Valid email dein."),
+    body("email")
+      .trim()
+      .isEmail()
+      .normalizeEmail()
+      .withMessage("Valid email dein."),
     body("password").notEmpty().withMessage("Password zaroori hai."),
   ],
   handleValidation,
-  login
+  login,
 );
 
 router.get("/verify", verify);
